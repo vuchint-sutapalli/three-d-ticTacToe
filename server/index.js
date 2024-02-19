@@ -72,10 +72,10 @@ io.on("connection", (socket)=> {
         
         if (targetRoom) {
           let targetRoomData = targetRoom.returnRoomObj()
-          const { rowIndex, colIndex } = data;
+          const { rowIndex, colIndex, level } = data;
       
           // Validate the move
-          if (targetRoom.isValidMove(rowIndex, colIndex)) {
+          if (targetRoom.isValidMove(rowIndex, colIndex, level)) {
             // Update the board state with the player's move
             targetRoom.updateBoard(data)
 
@@ -165,7 +165,6 @@ io.on("connection", (socket)=> {
         socket.join(roomId)
 
 
-        chosenRoom.addUser({id:socket.id, totem: 'y'})
         chosenRoom.addToQueue({id:socket.id, totem: 'y'})
    
         const roomClients = io.sockets.adapter.rooms.get(roomId);

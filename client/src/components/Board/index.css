@@ -6,21 +6,39 @@
 
 .tictactoe-board-wrapper{
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  width: 100%;
 }
 .tictactoe-board {
+    transform: rotateX(60deg) rotateZ(26deg);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 300px;
-    height: 300px;
+    width: 320px;
+    height: 320px;
     background-color: #f1f1f1;
     border: 1px solid #ccc;
     border-radius: 6px;
     padding: 10px;
   }
+.middle{
+  transform: rotateX(60deg) rotateZ(26deg) translateZ(80px) !important;
 
+}
+
+.last{
+  transform: rotateX(60deg) rotateZ(26deg) translateZ(160px) !important;
+
+}
+.threed-board{
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+}
   .inactive {
     pointer-events: none;
   }
@@ -39,8 +57,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 90px;
-    height: 90px;
+    width: 70px;
+    height: 70px;
     background-color: #fff;
     border: 1px solid #ccc;
     font-size: 32px;

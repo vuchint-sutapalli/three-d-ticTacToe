@@ -9,7 +9,7 @@ import socketService from '../../services/socketService';
 import LogMaintainer from '../LogMaintainer';
 
 const TicTacToeBoard = ({serverRoomId, logs, setLogs}) => {
-  const boardSize = 3;
+  const boardSize = 4;
 
 
   const [isBoardActive, setIsBoardActive] = useState(false);
@@ -18,14 +18,17 @@ const TicTacToeBoard = ({serverRoomId, logs, setLogs}) => {
 //   const [winProbability, setWinProbability] = useState('33 %');
   const [opponent, setOpponent] = useState('');
   const [totem, setTotem] = useState(null);
-  const [boardState, setBoardState] = useState(Array(boardSize).fill(Array(boardSize).fill(null)));
+  let board = Array(3).fill(Array(boardSize).fill(Array(boardSize).fill(null)))
+  // const sta = Array(3).fill(Array(boardSize*boardSize).fill(null));
+
+  const [boardState, setBoardState] = useState(board);
 
 
 
 
   const clearBoard= () => {
     // Reset the game state to start a new game
-    setBoardState(Array(boardSize).fill(Array(boardSize).fill(null)));
+    setBoardState(Array(3).fill(Array(boardSize).fill(Array(boardSize).fill(null))));
     setGameState(null);
   }
 
@@ -73,7 +76,7 @@ const TicTacToeBoard = ({serverRoomId, logs, setLogs}) => {
 
     socket.on('game-start', ({boardState, active, players }) => {
         clearBoard()
-        console.log(`game started and current player is ${active} ${players}`)
+        console.log(`game started and current player is ${active} with ${boardState}`)
 
         setGameState('started')
 
@@ -100,14 +103,16 @@ const TicTacToeBoard = ({serverRoomId, logs, setLogs}) => {
 
 
 
-  const handleCellClick = (event, rowIndex, colIndex) => {
+  const handleCellClick = (event, rowIndex, colIndex, level) => {
     event.preventDefault();
     event.stopPropagation();
-    if (boardState[rowIndex][colIndex] === null) {
+    // console.log((boardState));
+    console.log(boardState)
+    if (boardState[level][rowIndex][colIndex] === null) {
 
-        console.log(`cell clicked ${rowIndex} ${colIndex}`)
+        console.log(`cell clicked ${level} ${rowIndex} ${colIndex} `)
 
-        socketService.getSocket().emit("update_board", {rowIndex: rowIndex, colIndex: colIndex ,mark: totem}, serverRoomId, socketService.getSocket().id);
+        socketService.getSocket().emit("update_board", {rowIndex: rowIndex, colIndex: colIndex ,level:level,mark: totem}, serverRoomId, socketService.getSocket().id);
 
     }
   };
@@ -115,33 +120,67 @@ const TicTacToeBoard = ({serverRoomId, logs, setLogs}) => {
   return (
     <div className="tictactoe-board-container">
         <h1>{`joined room: ${serverRoomId} ${totem ?  `with totem ` + totem : '.Waiting for opponent to join'}`}</h1>
-
-        
-    
-        {/* <div>{`win probability : ${winProbability}`}</div> */}
-        <div>
+        <>
             {
-                gameState && ['won' , 'lost' , 'draw'].includes(gameState) ? (<Result handleRestart ={handleRestart} gameState={gameState} player={socketService.getSocket().id} opponent={opponent} onRestart={()=>{}}/>) : (<h2 style={{"height": '20px'}} >{isBoardActive? "Your turn!!" : ''}</h2>)
+                gameState && ['won' , 'lost' , 'draw'].includes(gameState) ? (
+                <Result handleRestart ={handleRestart} gameState={gameState} player={socketService.getSocket().id} opponent={opponent} onRestart={()=>{}}/>
+                ) : (
+                  <>
+                    {
+                        isBoardActive && (
+                          <h2 style={{"height": "20px"}} > "Your turn!!"</h2>
+                        )
+                    }   
+                  </>
+                )
             }
         
-        </div>
+        </>
        
         <div className='tictactoe-board-wrapper'>
-            <div className={`tictactoe-board ${isBoardActive ? '': 'inactive'}`}>
-                {boardState.map((row, rowIndex) => (
-                    <div key={rowIndex} className="tictactoe-row">
-                    {row.map((cell, colIndex) => (
-                        <div key={colIndex} className={`tictactoe-cell ${cell === totem ? 'mine' : ''}`} onClick={(event) => handleCellClick(event, rowIndex, colIndex)}>
-                            {cell && cell !== null ? (<span>{cell}</span>) : null}
+            <div className="threed-board">
+              <div className={`tictactoe-board top ${isBoardActive ? '': 'inactive'}`}>
+                    {boardState[0]?.map((row, rowIndex) => {
+                      return (
+                            <div key={rowIndex} className="tictactoe-row">
+                              {row?.map((cell, colIndex) => (
+                                  <div key={colIndex} className={`tictactoe-cell ${cell === totem ? 'mine' : ''}`} onClick={(event) => handleCellClick(event, rowIndex, colIndex, 0)}>
+                                      {cell && cell !== null ? (<span>{cell}</span>) : null}
+                                  </div>
+                              ))}
+                            </div>
+                        )
+                    }
+                    )}
+                </div>
+                <div className={`tictactoe-board middle ${isBoardActive ? '': 'inactive'}`}>
+                    {boardState[1]?.map((row, rowIndex) => (
+                        <div key={rowIndex} className="tictactoe-row">
+                        {row?.map((cell, colIndex) => (
+                            <div key={colIndex} className={`tictactoe-cell ${cell === totem ? 'mine' : ''}`} onClick={(event) => handleCellClick(event, rowIndex, colIndex,1)}>
+                                {cell && cell !== null ? (<span>{cell}</span>) : null}
+                            </div>
+                        ))}
                         </div>
                     ))}
-                    </div>
-                ))}
+                </div>
+                <div className={`tictactoe-board last ${isBoardActive ? '': 'inactive'}`}>
+                    {boardState[2]?.map((row, rowIndex) => (
+                        <div key={rowIndex} className="tictactoe-row">
+                        {row?.map((cell, colIndex) => (
+                            <div key={colIndex} className={`tictactoe-cell ${cell === totem ? 'mine' : ''}`} onClick={(event) => handleCellClick(event, rowIndex, colIndex,2)}>
+                                {cell && cell !== null ? (<span>{cell}</span>) : null}
+                            </div>
+                        ))}
+                        </div>
+                    ))}
+                </div>
             </div>
+           
             <ChatRoom serverRoomId ={serverRoomId} />
         </div>
 
-        <LogMaintainer setLogs={setLogs} logs={logs} />
+        {/* <LogMaintainer setLogs={setLogs} logs={logs} /> */}
 
     </div>
   );
